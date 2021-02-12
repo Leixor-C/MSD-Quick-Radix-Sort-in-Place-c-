@@ -1,186 +1,62 @@
+
 #include "qick_radix_sort.h"
-#include <stdlib.h>
-#include <time.h>   
-#include <iostream>
+#include <time.h>
 #include <chrono>
-#include<string>
-#include <array>
-#include <math.h>
-#include <bitset>
-
-class data
-{
-public:
-    data() {}
-    data(size_t& A):m(A) {};
-    size_t& get_size_t() { return m; };
-    
-    void operator = (data& A) { m = A.m; };
-    void operator = (size_t& A) { m = A; };
-    size_t m;
-};
-void object_version(const size_t pow10, const size_t pow2) {
-    size_t size = pow(10, pow10);
-    data* arr = new data[size];
-    size_t mod = 1 << (2 + pow2);
-    float mediana = 0.0;
-
-    for (size_t i = 0; i < 100; i++)
-    {
-        for (size_t i = 0; i < size; i++) {
-
-            arr[i].m = rand() % mod;
-        }
-
-
-        auto started = std::chrono::high_resolution_clock::now();
-        leixor::qick_radix_sort(arr, size);
-        auto done = std::chrono::high_resolution_clock::now();
-        mediana += float(std::chrono::duration_cast<std::chrono::nanoseconds>(done - started).count()) / float(1000000);
-    }
-    std::cout << "|" << mediana /100;
-
-    delete[] arr;
-
-};
-void pointer_object_version(const size_t pow10, const size_t pow2) {
-    size_t size = pow(10, pow10);
-    data** arr = new data * [size];
-    size_t mod = 1 << (1+ pow2);
-    float mediana = 0.0;
-    for (size_t i = 0; i < size; i++) 
-        arr[i] = new data();
-
-    for (size_t i = 0; i < 100; i++)
-    {
-
-        for (size_t i = 0; i < size; i++) {
-            arr[i]->m = rand() % mod;
-        }
-
-
-        auto started = std::chrono::high_resolution_clock::now();
-        leixor::qick_radix_sort(arr, size);
-        auto done = std::chrono::high_resolution_clock::now();
-
-        std::cout << "|" << float(std::chrono::duration_cast<std::chrono::nanoseconds>(done - started).count()) / float(1000000);
-        mediana += float(std::chrono::duration_cast<std::chrono::nanoseconds>(done - started).count()) / float(1000000);
-    }
-    std::cout << "|" << mediana / 100;
-
-    for (size_t i = 0; i < size; i++) {
-        delete arr[i];
-    }
-
-    delete[] arr;
-
-};
-int main() {
-    std::cout << "starting...\n";
-    std::array<std::string, 7> alfa = { "\nmax|1 ","\nnum|2 ","\npow|3 ","\n2  |4 ","\n   |5 " ,"\n   |6 " ,"\n   |7 " };
-
-
-std::cout <<
-        "\n      --------------------------------------------------" <<
-        "\n      ----------------object oriented version-----------" <<
-        "\n      --------------------------------------------------\n\n";
-        std::cout <<
-            "\n      ---------------------size pow 10------------------" <<
-            "\n      --------------------------------------------------" <<
-            "\n      |  1     |  2     |   3    |    4   |   5  |    6  |    7 |";
-
-        for (size_t z = 0; z < 7; z++) {
-            std::cout << "\n      --------------------------------------------------" <<
-                alfa[z];
-
-            for (size_t i = 1; i < 8; i++) {
-                object_version(i, z);
-            }
-        }
-        std::cout << "\n      --------------------------------------------------\n";
-
-    std::cout <<
-        "\n      --------------------------------------------------" <<
-        "\n      ----------------pointer oriented version-----------" <<
-        "\n      --------------------------------------------------\n\n";
-
-        std::cout <<
-            "\n      ---------------------size pow 10------------------" <<
-            "\n      --------------------------------------------------" <<
-            "\n      |  1   | 2    |    3 |    4 |    5 |    6 |    7 |";
-
-        for (size_t z = 0; z < 7; z++) {
-            std::cout << "\n      --------------------------------------------------" <<
-                alfa[z];
-
-            for (size_t i = 1; i < 8; i++) {
-                pointer_object_version(i, z);
-            }
-        }
-        std::cout << "\n      --------------------------------------------------\n";
-
-}
-/*#include <chrono>
 #include <vector>
-#include <map>
-
+#include <iterator>
+#include <algorithm>
+#include <iostream>
+#include <math.h>
+#include <string>
 int main() {
+    srand(time(NULL));
 
-	
+    std::vector<size_t> a;
+    size_t size ,mod;
+    float med;
+    std::chrono::high_resolution_clock::time_point started, done;
 
-	/*
-	std::cout << "\nreading..\n";
-	auto started = std::chrono::high_resolution_clock::now();
+    std::cout<<"starting..\n";
+    for (size_t siz = 0; siz < 10; ++siz){
+        a.push_back(rand()*1000000);
+    }
+    leixor::qick_radix_sort<size_t,size_t>(a.data(), a.size());//<the class it self,type of value to compare>
+    std::cout<<"Order arr: ";
 
-	text text_s("dummy_text.txt");
-	text_s.write_dic("order_dummy.txt");
-	auto done = std::chrono::high_resolution_clock::now();
-	auto first_done=done-started;
-
-	started = std::chrono::high_resolution_clock::now();
-
-	map<string, size_t> read;
-	string line;
-	ifstream myfile("dummy_text.txt");
-	if (myfile.is_open())
-	{
-		while (getline(myfile, line))
-		{
-			istringstream iss(line);
-			for (string s; iss >> s; )
-				read[s]++;
-
-		}
-		myfile.close();
-	}
-	else cout << "Unable to open file";
-
-	ofstream betafile;
-	betafile.open("order_dummy.txt");
-	map<string, size_t>::iterator itr;
-	for (itr = read.begin(); itr != read.end(); itr++) {
-		betafile << itr->first<< ":" << itr->second << "\n";
-	}
+    for (size_t siz = 0; siz < 10; ++siz){
+        std::cout<<a[siz]<<" ";
+    }
+    std::cout<<'\n';
+    a.clear();
+    size_t w,alfa;
+    std::vector<std::string> sizearr={"    4   |","    5   |","    6   |","    7   |","    8   |"};
+    std::cout<<
+    "  size  |----------------------------max num 10^i-----------------------------\n"<<
+    "  10^i  |    1   |    2    |    3    |    4    |    5    |    6    |    7    |\n"<<
+    "        |---------------------------------------------------------------------\n";
+    for (size_t i = 4; i < 9; ++i){
+ 
+        std::cout<<sizearr[i-4];
+        for (size_t z = 1; z < 8; ++z){
+            med=0.0;
+            size=pow(10,i);
+            mod=pow(10,z);
+            alfa=(z>3?(pow(10,z-4)*3):1);
+            for (w = 0; w < 100.0/pow(10,((i-3)/2)); ++w){
+                
+                for (size_t siz = 0; siz < size; ++siz){
+                    a.push_back(alfa*(rand() % mod));
+                }
 
 
-	betafile.close();
-	done = std::chrono::high_resolution_clock::now();
-
-	auto second_done = done - started;
-	std::cout << "first read time in seconds: " << std::chrono::duration_cast<std::chrono::seconds>(first_done).count() << '\n';
-	std::cout << "second read time in seconds: " << std::chrono::duration_cast<std::chrono::seconds>(second_done).count() << '\n';
-
-	/*
-	auto started = std::chrono::high_resolution_clock::now();
-	leixor::radix_sort_ftl(text_s.dic.data(), text_s.dic.size(),8);
-	auto done = std::chrono::high_resolution_clock::now();
-
-	std::cout << " time in milisecons: " << (float(std::chrono::duration_cast<std::chrono::nanoseconds>(done - started).count()) / float(1000000))<<'\n';
-	std::cout << "size of the vector: "<< text_s.dic.size()<<'\n';
-	std::cout << "sizeof(size_t)/sizeof(char): " << sizeof(size_t) / sizeof(char) <<'\n';
-	std::cout << "sizeof(size_t): " << sizeof(size_t)<< '\n';
-	std::cout << "sizeof(char): " << sizeof(char) << '\n';
-	text_s.write("order_dummy.txt");
-	
+                started = std::chrono::high_resolution_clock::now();
+                leixor::qick_radix_sort(a.data(), a.size());
+                done = std::chrono::high_resolution_clock::now();
+                med+=float(std::chrono::duration_cast<std::chrono::microseconds>(done - started).count())/1000.0;
+                a.clear();
+            }
+            std::cout<<med/float(w) <<" | ";
+        }
+        std::cout<<"\n";
+    }
 }
-*/

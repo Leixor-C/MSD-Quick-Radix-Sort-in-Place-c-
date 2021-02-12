@@ -1,139 +1,97 @@
-#pragma once
+#ifndef QICK_RAD_SOR
+#define QICK_RAD_SOR 1
+#include <cstddef>
+#define UNLIKELY(x) __builtin_expect((bool)(x),0)//we tell the compiler this if is improvable
+     /*
+     recomend compile g++ GNU
+     needs
+     the class need to have the next operator overload:
+     - bool=obj_arr & T;
+     - bool=obj_arr > obj_arr;
+     - void=obj_arr =obj_arr;
+     we need to define class T ex T=size_t;
+     if we do a custom class T we need the next operator overload:
+     - T=T{1}
+     - T=T<< size_t
+    //standard call mode leixor::qick_radix_sort(pointer,size of the arr); 
+    //call mode leixor::<class of the pointer,the type of value>qick_radix_sort(pointer,size of the arr);
+       - ex:leixor::<unsigned long long int,unsigned long long int>qick_radix_sort(pointer,size of the arr);
+     */
 namespace leixor {
-		//fast log in power of 2 we are using size so we can't use bit_width
-	static size_t& logb2(size_t num) {
-		size_t aux = 1;
-		if (num == 0) return (aux = -1);
-		while (0 < (num >>= 1))
-			aux++;
-		return aux;
-	}
-	//------------------------obj version---------------------------
-	//custom get_max because i don't wanna add lib,and normaly we will use this in a custom class
-	template<class obj_arr>
-	static size_t& get_max(obj_arr*& arr, const size_t& size) {
-		
-		size_t i = size%2, aux = arr[0].get_size_t(), aux2=-1;
-		if (size == 0)return aux2;
-		for (; i < size; i += 2) {
-			aux2 = arr[i].get_size_t();
-			aux = aux2 * (aux < aux2) + aux * (aux >= aux2);
-			aux2 = arr[i + 1].get_size_t();
-			aux = aux2 * (aux < aux2) + aux * (aux >= aux2);
-		}
-		return aux;
-	}
-	//----------------------------pointer obj version---------------------
-	template<class obj_arr>
-	static size_t& get_max(obj_arr**& arr, const size_t& size) {
-		
-		size_t i = size%2, aux = arr[0]->get_size_t(), aux2=-1;
-		if (size == 0)return aux2;
-		for (; i < size; i += 2) {
-			aux2 = arr[i]->get_size_t();
-			aux = aux2 * (aux < aux2) + aux * (aux >= aux2);
-			aux2 = arr[i + 1]->get_size_t();
-			aux = aux2 * (aux < aux2) + aux * (aux >= aux2);
-		}
-		return aux;
-	}
+    //is in excess on purpose
+    template<class obj_arr,class T>
+    size_t logb2(obj_arr* num) {
 
+        if (num == nullptr) return -1;
+        for (size_t i = sizeof(T)*8; i < size_t(-1); --i)
+            if (UNLIKELY(*num & T{1} << i))//this will be true only one time so is worth
+                return i;
+        return -1;
+    }
 
+    template<class obj_arr>
+    obj_arr* get_max(obj_arr* start, obj_arr* end) {
+        if (start == nullptr || end == nullptr) return nullptr;
+        if (start >end)return nullptr;
+        obj_arr* aux= start;
+        --end;
+        while (start<end){
+            ++start;
+            aux = (*start > *aux) ? start : aux;//we pass a pointer is more faster that pass the object it self
+        }
+        return aux;
+    }
 
-	//---------------------------------------------------------------------
-	//-----------------object orientedversion---------
-	template<class obj_arr>
-	void two_rad(obj_arr*& arr, size_t start, size_t finish, size_t depth) {
-		depth--;
-		static size_t s, f;
-		static bool mod_cal;
-		static obj_arr auxiliar;
+    template<class obj_arr,class T>
+    void two2_rad(obj_arr*const  start, obj_arr*const finish,const size_t depth) {
 
-		f = finish - 1; s = start;
-		while (s < f) {
-			auxiliar = arr[s];
-			if ((auxiliar.get_size_t() >> depth) % 2) {
-				arr[s] = arr[f];
-				arr[f] = auxiliar;
-				f--;
-			}
-			else
-				s++;
-		}
-		size_t mid = s + !((arr[s].get_size_t() >> depth) % 2);
-		if (depth > 0) {
-			if (mid - start > 2)
-				two_rad(arr, start, mid, depth);
-			else if (mid - start > 1) {
-				mod_cal = arr[start].get_size_t() > arr[start + 1].get_size_t();
+        if (finish <start + 2)//if is one elemente or non is alredy sort
+            return;
 
-				auxiliar = arr[start];
-				arr[start] = arr[start + mod_cal];
-				arr[start + mod_cal] = auxiliar;
-			}
-			if (finish - mid > 2)
-				two_rad(arr, mid, finish, depth);
-			else if (finish - mid > 1) {
-				mod_cal = arr[mid].get_size_t() > arr[mid + 1].get_size_t();
-				auxiliar = arr[mid];
-				arr[mid] = arr[mid + mod_cal];
-				arr[mid + mod_cal] = auxiliar;
-			}
-		}
+        obj_arr auxiliar;
 
-	}
-	template<class obj_arr>
-	bool qick_radix_sort(obj_arr* arr, size_t size) {
-		if (arr == nullptr || size < 2)
-			return false;
-		two_rad(arr, 0, size, logb2(get_max(arr, size)));
-		return true;
-	}
-	//-----------------pointer orientedversion---------
-	template<class obj_arr>
-	void two_rad(obj_arr**& arr, size_t start, size_t finish, size_t depth) {
-		depth--;
-		static size_t s, f;
-		static bool mod_cal;
-		static obj_arr* auxiliar;
-		
-		f = finish - 1; s = start;
-		while (s < f) {
-			auxiliar = arr[s];
-			if ((auxiliar->get_size_t() >> depth) % 2) {
-				arr[s] = arr[f];
-				arr[f] = auxiliar;
-				f--;
-			}else
-				s++;
-		}
-		size_t mid =s+ !((arr[s]->get_size_t() >> depth)%2);
-		if (depth>0){
-			if (mid-start>2)
-				two_rad(arr,start,mid,depth);
-			else if (mid - start > 1) {
-				mod_cal = arr[start]->get_size_t() > arr[start + 1]->get_size_t();
-				
-				auxiliar = arr[start];
-				arr[start] = arr[start + mod_cal];
-				arr[start + mod_cal] = auxiliar;
-			}
-			if (finish - mid > 2)
-				two_rad(arr,mid,finish,depth);
-			else if (finish - mid > 1) {
-				mod_cal = arr[mid]->get_size_t() > arr[mid + 1]->get_size_t();
-				auxiliar = arr[mid];
-				arr[mid] = arr[mid + mod_cal];
-				arr[mid + mod_cal] = auxiliar;
-			}
-		}
+        if (finish == start + 2) { //is more faster to do a comparetion bettewn 2 elements than risck a recursive inter ex: 1000 1001, if we do the recusive we will call this funtion 8 times again 
+            if (*start > *(start + 1)) {
+                auxiliar = *start;
+                *start = *(start + 1);
+                *(start + 1) = auxiliar;
+            }
+            return;
+        }
 
-	}
-	template<class obj_arr>
-	bool qick_radix_sort(obj_arr** arr, size_t size) {
-		if (arr == nullptr || size < 2)
-			return false;
-		two_rad(arr, 0, size, logb2(get_max(arr, size)));
-		return true;
-	}
+        obj_arr* s = start, * f = finish - 1;
+
+        while (s<f){
+            if (*s & T{1} << depth){
+                while(*f & T{1} << depth && s<f)//we supose the array is partialy sorted
+                    --f;
+                //less swaps more fast
+                auxiliar = *s;
+                *s = *f;
+                *f = auxiliar;
+                --f;
+            }else
+                ++s;//we supose the array is partialy sorted
+        }
+        if (!(*s & T{1} << depth))
+            ++s;
+        // is more faster do this than s+=!(*s & 1 << depth);
+
+        if (depth == 0) return;
+
+        two2_rad<obj_arr,T>(start, s, depth-1);
+        two2_rad<obj_arr,T>(s, finish, depth-1);
+    }
+
+    template<class obj_arr,class T=size_t>
+    bool qick_radix_sort(obj_arr* arr, size_t size) {
+        if (arr == nullptr || size < 2)
+            return false;
+        size_t depth= logb2<obj_arr,T>(get_max(arr, arr+size));
+        if (depth == size_t(-1))//the max number will be not 2^(2^32-1) i expect...
+            return false;
+        two2_rad<obj_arr,T>(arr,arr+size, depth);
+        return true;
+    }
 }
+#endif
