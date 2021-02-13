@@ -9,7 +9,7 @@
 #include <math.h>
 #include <string>
 int main() {
-    srand(time(NULL));
+    srand(1<<32-1);
 
     std::vector<size_t> a;
     size_t size ,mod;
@@ -18,12 +18,16 @@ int main() {
 
     std::cout<<"starting..\n";
     for (size_t siz = 0; siz < 10; ++siz){
-        a.push_back(rand()*1000000);
+        a.push_back(rand()%10);
     }
+    for (size_t siz = 0; siz < 10; ++siz){
+        std::cout<<a[siz]<<" ";
+    }
+    std::cout<<'\n';
     leixor::qick_radix_sort<size_t,size_t>(a.data(), a.size());//<the class it self,type of value to compare>
     std::cout<<"Order arr: ";
 
-    for (size_t siz = 0; siz < 10; ++siz){
+   for (size_t siz = 0; siz < 10; ++siz){
         std::cout<<a[siz]<<" ";
     }
     std::cout<<'\n';
@@ -45,7 +49,7 @@ int main() {
             for (w = 0; w < 100.0/pow(10,((i-3)/2)); ++w){
                 
                 for (size_t siz = 0; siz < size; ++siz){
-                    a.push_back(alfa*(rand() % mod));
+                    a.push_back((alfa*rand()+rand() )% mod);
                 }
 
 

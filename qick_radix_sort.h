@@ -1,7 +1,10 @@
 #ifndef QICK_RAD_SOR
 #define QICK_RAD_SOR 1
 #include <cstddef>
+
+
 #define UNLIKELY(x) __builtin_expect((bool)(x),0)//we tell the compiler this if is improvable
+
      /*
      recomend compile g++ GNU
      needs
@@ -60,18 +63,21 @@ namespace leixor {
         }
 
         obj_arr* s = start, * f = finish - 1;
-
         while (s<f){
             if (*s & T{1} << depth){
-                while(*f & T{1} << depth && s<f)//we supose the array is partialy sorted
+                
+                while(*f & T{1} << depth && f>s){//we supose the array is partialy sorted
                     --f;
+                }
+                if (f<=s)
+                    break;
                 //less swaps more fast
                 auxiliar = *s;
                 *s = *f;
                 *f = auxiliar;
                 --f;
-            }else
-                ++s;//we supose the array is partialy sorted
+            }
+            ++s;//we supose the array is partialy sorted
         }
         if (!(*s & T{1} << depth))
             ++s;
@@ -85,6 +91,7 @@ namespace leixor {
 
     template<class obj_arr,class T=size_t>
     bool qick_radix_sort(obj_arr* arr, size_t size) {
+
         if (arr == nullptr || size < 2)
             return false;
         size_t depth= logb2<obj_arr,T>(get_max(arr, arr+size));
